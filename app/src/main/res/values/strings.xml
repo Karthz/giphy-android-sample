@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Giphy</string>
+    <string name="trending_gifs_failed">Loading trending gifs failed</string>
+
+</resources>
