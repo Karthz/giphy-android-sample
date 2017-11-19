@@ -3,5 +3,6 @@
 
     <string name="trending_gifs_failed">Loading trending gifs failed.</string>
     <string name="search_results_failed">Search failed.</string>
+    <string name="action_retry">RETRY</string>
 
 </resources>

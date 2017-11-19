@@ -5,8 +5,6 @@ import com.karthz.giphy.model.remote.GiphyApi;
 import com.karthz.giphy.model.remote.RemoteDataSource;
 import com.karthz.giphy.util.Scheduler;
 
-import org.greenrobot.eventbus.EventBus;
-
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -21,8 +19,8 @@ class DataModule {
     }
 
     @Provides
-    DataSource providesRemoteDataSource(GiphyApi giphyApi, EventBus bus) {
-        return new RemoteDataSource(giphyApi, bus);
+    DataSource providesRemoteDataSource(GiphyApi giphyApi) {
+        return new RemoteDataSource(giphyApi);
     }
 
 }

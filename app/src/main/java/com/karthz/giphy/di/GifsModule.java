@@ -3,8 +3,7 @@ package com.karthz.giphy.di;
 import com.karthz.giphy.model.DataSource;
 import com.karthz.giphy.presenter.GifsContract;
 import com.karthz.giphy.presenter.GifsPresenter;
-
-import org.greenrobot.eventbus.EventBus;
+import com.karthz.giphy.util.Scheduler;
 
 import dagger.Module;
 import dagger.Provides;
@@ -24,8 +23,8 @@ class GifsModule {
     }
 
     @Provides
-    GifsContract.Presenter providesPresenter(GifsContract.View view, DataSource dataSource, EventBus bus) {
-        return new GifsPresenter(view, dataSource, bus);
+    GifsContract.Presenter providesPresenter(GifsContract.View view, DataSource dataSource, Scheduler scheduler) {
+        return new GifsPresenter(view, dataSource, scheduler);
     }
 
 }

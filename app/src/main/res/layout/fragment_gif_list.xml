@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,44 +8,51 @@
     android:orientation="vertical"
     tools:context=".ui.fragment.GifsListFragment">
 
-    <Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/colorPrimary"
-        android:elevation="4dp"
-        android:popupTheme="@style/PopupOverlay"
-        android:theme="@style/AppBarOverlay">
-
-        <SearchView
-            android:id="@+id/search_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:imeOptions="flagNoExtractUi" />
-
-    </Toolbar>
-
-    <ViewSwitcher
-        android:id="@+id/view_switcher"
-        android:name="com.karthz.giphy.ui.fragment.GifsListFragment"
+    <LinearLayout
+        android:id="@+id/root_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.karthz.giphy.ui.fragment.GifsListFragment"
-        tools:listitem="@layout/gif_item">
+        android:orientation="vertical">
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/colorPrimary"
+            android:elevation="4dp"
+            android:popupTheme="@style/PopupOverlay"
+            android:theme="@style/AppBarOverlay">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/gifs_list"
+            <SearchView
+                android:id="@+id/search_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:imeOptions="flagNoExtractUi" />
+
+        </Toolbar>
+
+        <ViewSwitcher
+            android:id="@+id/view_switcher"
+            android:name="com.karthz.giphy.ui.fragment.GifsListFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            app:layoutManager="GridLayoutManager" />
+            tools:context="com.karthz.giphy.ui.fragment.GifsListFragment"
+            tools:listitem="@layout/gif_item">
 
-    </ViewSwitcher>
-</LinearLayout>
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/gifs_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                app:layoutManager="GridLayoutManager" />
+
+        </ViewSwitcher>
+    </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

@@ -2,47 +2,58 @@ package com.karthz.giphy.presenter;
 
 import android.support.annotation.NonNull;
 
-import com.karthz.giphy.event.SearchGifsFailed;
-import com.karthz.giphy.event.SearchGifsSuccess;
-import com.karthz.giphy.event.TrendingGifsFailed;
-import com.karthz.giphy.event.TrendingGifsSuccess;
 import com.karthz.giphy.model.DataSource;
 import com.karthz.giphy.model.data.Gif;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
+import com.karthz.giphy.util.Scheduler;
 
 import java.util.List;
+
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public class GifsPresenter implements GifsContract.Presenter {
 
     private GifsContract.View gifsView;
     private DataSource dataSource;
-    private EventBus bus;
+    protected Scheduler scheduler;
+    private CompositeDisposable compositeDisposable;
 
     public GifsPresenter(@NonNull GifsContract.View gifsView,
                          @NonNull DataSource dataSource,
-                         @NonNull EventBus bus) {
+                         @NonNull Scheduler scheduler) {
         this.gifsView = gifsView;
         this.dataSource = dataSource;
-        this.bus = bus;
+        this.scheduler = scheduler;
+        this.compositeDisposable = new CompositeDisposable();
     }
 
     @Override
     public void subscribe() {
-        bus.register(this);
         gifsView.showLoading();
     }
 
     @Override
     public void unsubscribe() {
         gifsView.clearList();
-        bus.unregister(this);
+        compositeDisposable.clear();
     }
 
     @Override
     public void getTrendingGifs(int offset) {
-        dataSource.getTrendingGifs(offset);
+        compositeDisposable.clear();
+
+        if (offset == 0) {
+            gifsView.clearList();
+        }
+
+        Disposable disposable = dataSource.getTrendingGifs(offset)
+                .subscribeOn(scheduler.io())
+                .observeOn(scheduler.ui())
+                .subscribe(
+                        gifs -> onGifsUpdated(gifs),
+                        throwable -> onTrendingFailed());
+
+        compositeDisposable.add(disposable);
     }
 
     @Override
@@ -51,7 +62,16 @@ public class GifsPresenter implements GifsContract.Presenter {
             gifsView.clearList();
         }
 
-        dataSource.getSearchResults(query, offset);
+        compositeDisposable.clear();
+
+        Disposable disposable = dataSource.getSearchResults(query, offset)
+                .subscribeOn(scheduler.io())
+                .observeOn(scheduler.ui())
+                .subscribe(
+                        gifs -> onGifsUpdated(gifs),
+                        throwable -> onSearchFailed());
+
+        compositeDisposable.add(disposable);
     }
 
     private void onGifsUpdated(List<Gif> gifs) {
@@ -59,23 +79,13 @@ public class GifsPresenter implements GifsContract.Presenter {
         gifsView.hideLoading();
     }
 
-    @Subscribe
-    public void onTrendingGifsSuccessful(TrendingGifsSuccess event) {
-        onGifsUpdated(event.getGifs());
-    }
-
-    @Subscribe
-    public void onTrendingGifsFailed(TrendingGifsFailed event) {
+    private void onTrendingFailed() {
+        gifsView.hideLoading();
         gifsView.showTrendingGifsFailure();
     }
 
-    @Subscribe
-    public void onSearchGifsSuccessful(SearchGifsSuccess event) {
-        onGifsUpdated(event.getGifs());
-    }
-
-    @Subscribe
-    public void onSearchGifsFailed(SearchGifsFailed event) {
+    private void onSearchFailed() {
+        gifsView.hideLoading();
         gifsView.showSearchResultsFailure();
     }
 

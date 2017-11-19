@@ -4,10 +4,6 @@ import android.content.Context;
 
 import com.karthz.giphy.GiphyApplication;
 
-import org.greenrobot.eventbus.EventBus;
-
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 
@@ -23,11 +19,6 @@ class AppModule {
     @Provides
     Context provideApplicationContext() {
         return application;
-    }
-
-    @Provides @Singleton
-    EventBus provideEventBus() {
-        return EventBus.getDefault();
     }
 
 }

@@ -3,6 +3,7 @@ package com.karthz.giphy.ui.fragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -50,6 +51,7 @@ public class GifsListFragment extends Fragment
 
     private GifsComponent gifsComponent;
 
+    private View rootView;
     private SearchView searchView;
     private ViewSwitcher viewSwitcher;
     private RecyclerView recyclerView;
@@ -95,6 +97,7 @@ public class GifsListFragment extends Fragment
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         getActivity().setActionBar(toolbar);
 
+        rootView = view.findViewById(R.id.root_view);
         searchView = view.findViewById(R.id.search_view);
         searchView.setOnCloseListener(onCloseListener);
 
@@ -192,12 +195,16 @@ public class GifsListFragment extends Fragment
 
     @Override
     public void showTrendingGifsFailure() {
-        Toast.makeText(getActivity(), R.string.trending_gifs_failed, Toast.LENGTH_LONG).show();
+        Snackbar.make(rootView, R.string.trending_gifs_failed, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.action_retry, actionListener)
+                .show();
     }
 
     @Override
     public void showSearchResultsFailure() {
-        Toast.makeText(getActivity(), R.string.search_results_failed, Toast.LENGTH_LONG).show();
+        Snackbar.make(rootView, R.string.search_results_failed, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.action_retry, actionListener)
+                .show();
     }
 
     @Override
@@ -209,4 +216,6 @@ public class GifsListFragment extends Fragment
     public void onLoadMore(int offset) {
         loadGifs(offset);
     }
+
+    private View.OnClickListener actionListener = view -> loadGifs(0);
 }
