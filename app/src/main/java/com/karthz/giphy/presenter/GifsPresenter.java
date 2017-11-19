@@ -40,19 +40,17 @@ public class GifsPresenter implements GifsContract.Presenter {
 
     @Override
     public void getTrendingGifs(int offset) {
-        compositeDisposable.clear();
-
         if (offset == 0) {
             gifsView.clearList();
         }
 
+        compositeDisposable.clear();
         Disposable disposable = dataSource.getTrendingGifs(offset)
                 .subscribeOn(scheduler.io())
                 .observeOn(scheduler.ui())
                 .subscribe(
                         gifs -> onGifsUpdated(gifs),
                         throwable -> onTrendingFailed());
-
         compositeDisposable.add(disposable);
     }
 
@@ -63,14 +61,12 @@ public class GifsPresenter implements GifsContract.Presenter {
         }
 
         compositeDisposable.clear();
-
         Disposable disposable = dataSource.getSearchResults(query, offset)
                 .subscribeOn(scheduler.io())
                 .observeOn(scheduler.ui())
                 .subscribe(
                         gifs -> onGifsUpdated(gifs),
                         throwable -> onSearchFailed());
-
         compositeDisposable.add(disposable);
     }
 
