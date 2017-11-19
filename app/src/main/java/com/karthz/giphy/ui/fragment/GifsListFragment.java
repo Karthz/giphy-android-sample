@@ -6,58 +6,71 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 import android.widget.ViewSwitcher;
 
+import com.jakewharton.rxbinding2.widget.RxSearchView;
 import com.karthz.giphy.GiphyApplication;
 import com.karthz.giphy.R;
 import com.karthz.giphy.di.ComponentHelper;
-import com.karthz.giphy.di.TrendingComponent;
+import com.karthz.giphy.di.GifsComponent;
 import com.karthz.giphy.model.data.Gif;
 import com.karthz.giphy.model.remote.GiphyApi;
-import com.karthz.giphy.presenter.Contract;
+import com.karthz.giphy.presenter.GifsContract;
 import com.karthz.giphy.ui.adapter.EndlessRecyclerViewScrollListener;
 import com.karthz.giphy.ui.adapter.GifsListAdapter;
 import com.karthz.giphy.ui.util.ItemDecoration;
-
-import org.greenrobot.eventbus.EventBus;
+import com.karthz.giphy.util.Scheduler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-public class TrendingFragment extends Fragment
-        implements Contract.View, EndlessRecyclerViewScrollListener.ScrollListener,
+import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+
+public class GifsListFragment extends Fragment
+        implements GifsContract.View, EndlessRecyclerViewScrollListener.ScrollListener,
         GifsListAdapter.Listener {
 
     @Inject
-    EventBus bus;
+    GifsContract.Presenter presenter;
 
     @Inject
-    Contract.Presenter presenter;
+    Scheduler scheduler;
 
+    private GifsComponent gifsComponent;
+
+    private SearchView searchView;
     private ViewSwitcher viewSwitcher;
     private RecyclerView recyclerView;
     private GifsListAdapter adapter;
     private GridLayoutManager layoutManager;
-    private TrendingComponent trendingComponent;
-    private TrendingListener trendingListener;
+    private GifsListListener listener;
+    private CompositeDisposable compositeDisposable;
 
+    private static final long SEARCH_DELAY = 500;
     private final int INDEX_PROGRESS = 0;
     private final int INDEX_LIST = 1;
 
-    public interface TrendingListener {
+    public interface GifsListListener {
         void onItemSelected(Gif item);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        init();
+        gifsComponent = ComponentHelper.createTrendingComponent(GiphyApplication.get(getActivity()).getAppComponent(), this);
+        gifsComponent.inject(this);
         adapter = new GifsListAdapter(getActivity(), new ArrayList<Gif>(), this);
         layoutManager = new GridLayoutManager(getActivity(), 3);
     }
@@ -66,45 +79,67 @@ public class TrendingFragment extends Fragment
     public void onStart() {
         super.onStart();
         presenter.subscribe();
+        loadGifs(0);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        adapter.clear();
         presenter.unsubscribe();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gif_list, container, false);
+
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        getActivity().setActionBar(toolbar);
+
+        searchView = view.findViewById(R.id.search_view);
+        searchView.setOnCloseListener(onCloseListener);
+
         viewSwitcher = view.findViewById(R.id.view_switcher);
         recyclerView = view.findViewById(R.id.gifs_list);
         setupRecyclerView();
+
+        Observable<CharSequence> searchViewObservable = RxSearchView.queryTextChanges(searchView);
+        compositeDisposable = new CompositeDisposable();
+
+        Disposable searchDisposable = searchViewObservable
+                .debounce(SEARCH_DELAY, TimeUnit.MILLISECONDS)
+                .observeOn(scheduler.ui())
+                .subscribe(query -> {
+                    if (!TextUtils.isEmpty(query)) {
+                        presenter.getSearchResults(query.toString(), 0);
+                    }
+                });
+
+        compositeDisposable.add(searchDisposable);
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        compositeDisposable.clear();
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof TrendingListener) {
-            trendingListener = (TrendingListener) context;
+        if (context instanceof GifsListListener) {
+            listener = (GifsListListener) context;
         } else {
             throw new RuntimeException(context.toString() + " must implement "
-                    + TrendingFragment.TrendingListener.class.getSimpleName());
+                    + GifsListListener.class.getSimpleName());
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        trendingListener = null;
-    }
-
-    protected void init() {
-        trendingComponent = ComponentHelper.createTrendingComponent(GiphyApplication.get(getActivity()).getAppComponent(), this);
-        trendingComponent.inject(this);
+        listener = null;
     }
 
     private void setupRecyclerView() {
@@ -119,43 +154,59 @@ public class TrendingFragment extends Fragment
         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager, this));
     }
 
-    @Override
-    public void onItemSelected(Gif item) {
-        if (trendingListener != null) {
-            trendingListener.onItemSelected(item);
+    private SearchView.OnCloseListener onCloseListener = () -> {
+        presenter.getTrendingGifs(0);
+        return false;
+    };
+
+    private void loadGifs(int offset) {
+        String searchQuery = searchView.getQuery().toString();
+        if (TextUtils.isEmpty(searchQuery)) {
+            presenter.getTrendingGifs(offset);
+        } else {
+            presenter.getSearchResults(searchQuery, offset);
         }
     }
 
     @Override
-    public void setPresenter(Contract.Presenter presenter) {
-        this.presenter = presenter;
+    public void onItemSelected(Gif item) {
+        if (listener != null) {
+            listener.onItemSelected(item);
+        }
     }
 
     @Override
-    public void setShowLoading() {
+    public void showLoading() {
         viewSwitcher.setDisplayedChild(INDEX_PROGRESS);
     }
 
     @Override
-    public void showGifs(List<Gif> gifs) {
+    public void hideLoading() {
         viewSwitcher.setDisplayedChild(INDEX_LIST);
+    }
+
+    @Override
+    public void showGifs(List<Gif> gifs) {
         adapter.addData(gifs);
     }
 
     @Override
-    public void showGifDetailsUi(Gif gif) {
-        if (trendingListener != null) {
-            trendingListener.onItemSelected(gif);
-        }
-    }
-
-    @Override
-    public void showFailure() {
+    public void showTrendingGifsFailure() {
         Toast.makeText(getActivity(), R.string.trending_gifs_failed, Toast.LENGTH_LONG).show();
     }
 
     @Override
+    public void showSearchResultsFailure() {
+        Toast.makeText(getActivity(), R.string.search_results_failed, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void clearList() {
+        adapter.clear();
+    }
+
+    @Override
     public void onLoadMore(int offset) {
-        presenter.loadGifs(offset);
+        loadGifs(offset);
     }
 }

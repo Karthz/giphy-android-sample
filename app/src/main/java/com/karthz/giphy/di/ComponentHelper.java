@@ -1,7 +1,7 @@
 package com.karthz.giphy.di;
 
 import com.karthz.giphy.GiphyApplication;
-import com.karthz.giphy.presenter.Contract;
+import com.karthz.giphy.presenter.GifsContract;
 
 public class ComponentHelper {
 
@@ -11,12 +11,8 @@ public class ComponentHelper {
                 .build();
     }
 
-    public static TrendingComponent createTrendingComponent(AppComponent appComponent, Contract.View view) {
-        return appComponent.plus(new TrendingModule(view));
-    }
-
-    public static SearchComponent createSearchComponent(AppComponent appComponent, Contract.View view) {
-        return appComponent.plus(new SearchModule(view));
+    public static GifsComponent createTrendingComponent(AppComponent appComponent, GifsContract.View view) {
+        return appComponent.plus(new GifsModule(view));
     }
 
 }

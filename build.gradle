@@ -23,18 +23,25 @@ task clean(type: Delete) {
 }
 
 ext {
-    // SDK and tools
+    //Android SDK and tools
     compileSdkVersion = 27
     minSdkVersion = 22
     targetSdkVersion = 27
     buildToolsVersion = '27.0.0'
-    supportLibraryVersion = '27.0.0'
+    supportLibraryVersion = '27.0.1'
 
+    //Test dependencies
     junitVersion = '4.12'
-    espressoVersion = '3.0.0'
+    espressoVersion = '3.0.1'
+    testRunnerVersion = '1.0.1'
 
+    //Third-party dependencies
     daggerVersion = '2.12'
     retrofitVersion = '2.3.0'
+    rxjavaVersion = '2.1.6'
+    rxandroidVersion = '2.0.1'
+    rxBindingVersion = '2.0.0'
     glideVersion = '4.3.1'
     eventbusVersion = '3.1.1'
+    loggingInterceptorVersion = '3.9.0'
 }

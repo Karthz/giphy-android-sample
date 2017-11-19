@@ -38,6 +38,7 @@ public class GifsListAdapter extends RecyclerView.Adapter<GifsListAdapter.ViewHo
 
     public void clear() {
         this.gifs.clear();
+        notifyDataSetChanged();
     }
 
     @Override

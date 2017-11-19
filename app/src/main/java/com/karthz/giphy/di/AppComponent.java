@@ -17,9 +17,7 @@ import dagger.Component;
 )
 public interface AppComponent {
 
-    TrendingComponent plus(TrendingModule module);
-
-    SearchComponent plus(SearchModule module);
+    GifsComponent plus(GifsModule module);
 
     void inject(GiphyApplication application);
 

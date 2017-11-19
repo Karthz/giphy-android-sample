@@ -1,26 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:name="com.karthz.giphy.ui.fragment.GifsListFragment"
-    tools:context="com.karthz.giphy.ui.fragment.TrendingFragment"
-    tools:listitem="@layout/gif_item"
-    android:id="@+id/view_switcher"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:orientation="vertical"
+    tools:context=".ui.fragment.GifsListFragment">
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/colorPrimary"
+        android:elevation="4dp"
+        android:popupTheme="@style/PopupOverlay"
+        android:theme="@style/AppBarOverlay">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/gifs_list"
+        <SearchView
+            android:id="@+id/search_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:imeOptions="flagNoExtractUi" />
+
+    </Toolbar>
+
+    <ViewSwitcher
+        android:id="@+id/view_switcher"
+        android:name="com.karthz.giphy.ui.fragment.GifsListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        app:layoutManager="GridLayoutManager" />
+        tools:context="com.karthz.giphy.ui.fragment.GifsListFragment"
+        tools:listitem="@layout/gif_item">
 
-</ViewSwitcher>
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/gifs_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            app:layoutManager="GridLayoutManager" />
+
+    </ViewSwitcher>
+</LinearLayout>
