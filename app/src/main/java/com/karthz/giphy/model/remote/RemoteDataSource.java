@@ -37,38 +37,4 @@ public class RemoteDataSource implements DataSource {
         return giphyApi.getSearchResults(searchQuery, offset)
                 .map(ApiResponse::getGifs);
     }
-
-//    private Callback<ApiResponse> trendingCallback = new Callback<ApiResponse>() {
-//        @Override
-//        public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-//            if (response.isSuccessful()) {
-//                List<Gif> gifs = response.body().getGifs();
-//                bus.post(new TrendingGifsSuccess(gifs));
-//            } else {
-//                bus.post(new TrendingGifsFailed());
-//            }
-//        }
-//
-//        @Override
-//        public void onFailure(Call<ApiResponse> call, Throwable t) {
-//            bus.post(new TrendingGifsFailed());
-//        }
-//    };
-//
-//    private Callback<ApiResponse> searchCallback = new Callback<ApiResponse>() {
-//        @Override
-//        public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-//            if (response.isSuccessful()) {
-//                List<Gif> gifs = response.body().getGifs();
-//                bus.post(new SearchGifsSuccess(gifs));
-//            } else {
-//                bus.post(new SearchGifsFailed());
-//            }
-//        }
-//
-//        @Override
-//        public void onFailure(Call<ApiResponse> call, Throwable t) {
-//            bus.post(new SearchGifsFailed());
-//        }
-//    };
 }
